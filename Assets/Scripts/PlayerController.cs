@@ -8,6 +8,8 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private PlayerInput playerInput;
     private InputAction runAction;
+    private ViewDetector viewDetector;
+    private PlayerState playerState;
 
     [SerializeField] private float moveSpeed;
     [SerializeField] private float speedUp;
@@ -36,17 +38,16 @@ public class PlayerController : MonoBehaviour
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
+        viewDetector = GetComponent<ViewDetector>();
+        playerState = GetComponent<PlayerState>();
         runAction = playerInput.actions["Run"];
     }
 
 
     private void Update()
     {
-        if(isAtk)
-        {
-            PlayerMove();
-            SpeedUp();
-        }
+        PlayerMove();
+        SpeedUp();
         Gravity();
         AttackTime();
     }
@@ -74,7 +75,12 @@ public class PlayerController : MonoBehaviour
 
         moveVec = camforward * inputVec.y + camRight * inputVec.x;
         Vector3 velocity = moveVec * (moveSpeed + (runValue * speedUp)) + Vector3.up * verticlaVelocity;
-        characterController.Move(velocity * Time.deltaTime);
+
+        if(isAtk)
+        {
+            characterController.Move(velocity * Time.deltaTime);
+        }
+        
 
         if (isMove && moveVec != Vector3.zero)
         {
@@ -121,7 +127,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (isCombo)
         {
-            if(comboIndex < 3)
+            if(comboIndex < 4)
             {
                 comboIndex++;
                 animator.SetTrigger("Attack" + comboIndex);
@@ -162,6 +168,23 @@ public class PlayerController : MonoBehaviour
         if (value.isPressed)
         {
             OnAttack();
+        }
+    }
+
+    public void BasicAttack()
+    {
+        viewDetector.FindTarget();
+        viewDetector.angle = 135 - 30 * comboIndex;
+        if (viewDetector.Target != null)
+        {
+            if (Random.value < playerState.cPercent)
+            {
+                viewDetector.Target.GetComponent<IInteractable>().TakeHit(playerState.damage * comboIndex * playerState.cDamage, TextType.critical);
+            }
+            else
+            {
+                viewDetector.Target.GetComponent<IInteractable>().TakeHit(playerState.damage * comboIndex, TextType.Basic);
+            }
         }
     }
 

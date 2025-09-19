@@ -16,7 +16,7 @@ public class AnimationState : StateMachineBehaviour
         animator.GetComponent<PlayerController>().isAtk = true;
         if (controller == null)
             controller = animator.GetComponent<PlayerController>();
-        if(comboStep < 4)
+        if(comboStep <= 4)
         {
             controller.StartCombo(comboStep, comboTime);
         }
