@@ -3,7 +3,7 @@ using UnityEngine;
 public class AnimationState : StateMachineBehaviour
 {
     [SerializeField] private int comboStep;
-    [SerializeField] private float comboTime = 1f;
+    [SerializeField] private float comboTime = 0.5f;
     private PlayerController controller;
 
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

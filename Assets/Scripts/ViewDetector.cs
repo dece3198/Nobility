@@ -9,7 +9,8 @@ public class ViewDetector : MonoBehaviour
 
     [SerializeField] private float radius;
     [SerializeField] private float attackRadius;
-    public float angle;
+    [SerializeField] private float angle;
+    [SerializeField] private float atkAngle;
     [SerializeField] private LayerMask layerMask;
 
     public void FindTarget()
@@ -42,18 +43,16 @@ public class ViewDetector : MonoBehaviour
         for (int i = 0; i < targets.Length; i++)
         {
             Vector3 findTarget = (targets[i].transform.position - transform.position).normalized;
-            if (Vector3.Dot(transform.forward, findTarget) < Mathf.Cos(angle * 0.5f * Mathf.Deg2Rad))
+            if (Vector3.Dot(transform.forward, findTarget) < Mathf.Cos(atkAngle * 0.5f * Mathf.Deg2Rad))
             {
                 continue;
             }
-
-
 
             attackTarget = targets[i].gameObject;
             return;
         }
 
-        target = null;
+        attackTarget = null;
     }
 
     private void OnDrawGizmosSelected()

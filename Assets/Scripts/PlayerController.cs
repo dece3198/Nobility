@@ -46,8 +46,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        PlayerMove();
-        SpeedUp();
+        if(isAtk)
+        {
+            PlayerMove();
+            SpeedUp();
+        }
         Gravity();
         AttackTime();
     }
@@ -76,11 +79,7 @@ public class PlayerController : MonoBehaviour
         moveVec = camforward * inputVec.y + camRight * inputVec.x;
         Vector3 velocity = moveVec * (moveSpeed + (runValue * speedUp)) + Vector3.up * verticlaVelocity;
 
-        if(isAtk)
-        {
-            characterController.Move(velocity * Time.deltaTime);
-        }
-        
+        characterController.Move(velocity * Time.deltaTime);
 
         if (isMove && moveVec != Vector3.zero)
         {
@@ -134,6 +133,14 @@ public class PlayerController : MonoBehaviour
                 isCombo = false;
             }
         }
+
+        viewDetector.FindTarget();
+        if(viewDetector.Target != null)
+        {
+            Vector3 dir = viewDetector.Target.transform.position - transform.position;
+            Vector3 dirVec = dir.normalized;
+            transform.rotation = Quaternion.LookRotation(dirVec);
+        }
     }
 
     //콤보 시간 시작
@@ -161,7 +168,10 @@ public class PlayerController : MonoBehaviour
     void OnRoll(InputValue value)
     {
         if (value.isPressed && isRolling)
+        {
             StartCoroutine(RollCo());
+        }
+            
     }
     void OnFire1(InputValue value)
     {
@@ -174,7 +184,7 @@ public class PlayerController : MonoBehaviour
     public void BasicAttack()
     {
         viewDetector.FindTarget();
-        viewDetector.angle = 135 - 30 * comboIndex;
+
         if (viewDetector.Target != null)
         {
             if (Random.value < playerState.cPercent)
@@ -188,23 +198,33 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private IEnumerator AttackStep(Vector3 dir)
+    {
+        float time = 0.1f;
+        while(time > 0)
+        {
+            time -= Time.deltaTime;
+            characterController.Move(dir * 2f * Time.deltaTime);
+            yield return null;
+        }
+    }
+
     //구르기 코루틴
     private IEnumerator RollCo()
     {
         isRolling = false;
         float time = 0f;
         animator.SetTrigger("Roll");
-
         Vector3 rollDir = transform.forward;
-
+        gameObject.layer = 0;
         while(time < 0.5f)
         {
             characterController.Move(rollDir * rollSpeed * Time.deltaTime);
             time += Time.deltaTime;
             yield return null;
         }
-
-        yield return new WaitForSeconds(5f);
+        gameObject.layer = 6;
+        yield return new WaitForSeconds(2.5f);
         isRolling = true;
     }
 }
